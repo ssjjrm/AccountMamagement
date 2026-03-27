@@ -1,102 +1,203 @@
 #include "card_file.h"
 
-struct Card cardList[100];
+
+
+//struct Card cardList[100];
+
+
+
+// CardNode 结构体（你原代码，不动）
+struct CardNode {
+    Card data;
+    struct CardNode* next;
+};
+
+// 链表头指针（初始为空）
+static struct CardNode* cardListHead = NULL;
 static int g_cardCount = 0;//记录当前有效卡片数量
 
-//初始化测试卡数据
+int addCardNode(Card newCard) {
+    // 1. 分配新节点
+    struct CardNode* newNode = (struct CardNode*)malloc(sizeof(struct CardNode));
+    if (newNode == NULL) return -1;
+
+    newNode->data = newCard;
+    newNode->next = NULL;
+
+    // 2. 尾插
+    if (cardListHead == NULL) {
+        cardListHead = newNode;
+    }
+    else {
+        struct CardNode* current = cardListHead;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = newNode;
+    }
+    g_cardCount++;
+    return 0;
+}
+
+struct Card* searchCardNode(Card findCard) {
+    // 空链表判断
+    if (cardListHead == NULL) {
+        return NULL;
+    }
+
+    struct CardNode* p = cardListHead;
+    while (1) {
+        // 字符串比较用strcmp
+        if (strcmp(p->data.aName, findCard.aName) == 0) {
+            return &p->data;
+        }
+        else {
+            if (p->next != NULL) {
+                p = p->next;
+            }
+            else {
+                return NULL;
+            }
+        }
+    }
+}
+
+int deleteCardNode(Card findCard) {
+    // 空链表判断
+    if (cardListHead == NULL) {
+        return 0;
+    }
+
+    struct CardNode* p = cardListHead;
+    struct CardNode* before = cardListHead;
+    while (1) {
+        // 字符串比较用strcmp
+        if (strcmp(p->data.aName, findCard.aName) == 0) {
+            g_cardCount--;
+            if (p == cardListHead) {
+                cardListHead = p->next;
+            }
+            else {
+                before->next = p->next;
+            }
+            free(p); //释放节点内存，防止泄漏
+            return 1;
+        }
+        else {
+            if (p->next != NULL) {
+                // 前驱指针正确移动逻辑
+                before = p;
+                p = p->next;
+            }
+            else {
+                return 0;
+            }
+        }
+    }
+}
+
+
+
+
 void initStaticCardData()
 {
     // static变量控制仅执行1次初始化
     static int isInited = 0;
     if (isInited) return;
 
-    // 初始化3张测试卡数据
+    Card card; // 临时卡片变量
+    // 初始化3张测试卡数据 → 调用addCardNode尾插链表
     // 第1张测试卡
-    strcpy(cardList[0].aName, "6222020001");
-    strcpy(cardList[0].aPwd, "123456");
-    cardList[0].nStatus = 0;
-    cardList[0].tStart = time(NULL);  // 开卡时间为当前时间
-    cardList[0].tEnd = 0;
-    cardList[0].fTotalUse = 0.0f;
-    cardList[0].tLast = time(NULL);
-    cardList[0].nUseCount = 0;
-    cardList[0].fBalance = 100.0f;
-    cardList[0].nDel = 0;
+    strcpy(card.aName, "1");
+    strcpy(card.aPwd, "123");
+    card.nStatus = 0;
+    card.tStart = time(NULL);
+    card.tEnd = 0;
+    card.fTotalUse = 0.0f;
+    card.tLast = time(NULL);
+    card.nUseCount = 0;
+    card.fBalance = 100.0f;
+    card.nDel = 0;
+    addCardNode(card); // 链表尾插
 
     // 第2张测试卡
-    strcpy(cardList[1].aName, "6222020002");
-    strcpy(cardList[1].aPwd, "654321");
-    cardList[1].nStatus = 0;
-    cardList[1].tStart = time(NULL);
-    cardList[1].tEnd = 0;
-    cardList[1].fTotalUse = 0.0f;
-    cardList[1].tLast = time(NULL);
-    cardList[1].nUseCount = 0;
-    cardList[1].fBalance = 200.0f;
-    cardList[1].nDel = 0;
+    strcpy(card.aName, "2");
+    strcpy(card.aPwd, "123");
+    card.nStatus = 0;
+    card.tStart = time(NULL);
+    card.tEnd = 0;
+    card.fTotalUse = 0.0f;
+    card.tLast = time(NULL);
+    card.nUseCount = 0;
+    card.fBalance = 200.0f;
+    card.nDel = 0;
+    addCardNode(card); // 链表尾插
 
     // 第3张测试卡
-    strcpy(cardList[2].aName, "6222020003");
-    strcpy(cardList[2].aPwd, "000000");
-    cardList[2].nStatus = 0;
-    cardList[2].tStart = time(NULL);
-    cardList[2].tEnd = 0;
-    cardList[2].fTotalUse = 0.0f;
-    cardList[2].tLast = time(NULL);
-    cardList[2].nUseCount = 0;
-    cardList[2].fBalance = 500.0f;
-    cardList[2].nDel = 0;
+    strcpy(card.aName, "3");
+    strcpy(card.aPwd, "123");
+    card.nStatus = 0;
+    card.tStart = time(NULL);
+    card.tEnd = 0;
+    card.fTotalUse = 0.0f;
+    card.tLast = time(NULL);
+    card.nUseCount = 0;
+    card.fBalance = 500.0f;
+    card.nDel = 0;
+    addCardNode(card); // 链表尾插
 
-    // 更新有效卡片数量
-    g_cardCount = 3;
-    isInited = 1; // 标记已初始化，后续不再执行
+    isInited = 1; // 标记已初始化
 }
 
 //新增卡
-int insertCard(Card newCard){
+int insertCard(Card newCard) {
     if (g_cardCount >= 100)
     {
-        printf("卡数组已满\n");
+        printf("卡链表已满\n");
         return -1;
     }
 
-    //校验卡号是否重复（排除已删除的卡）
-    for (int i = 0; i < g_cardCount; i++)
+    // 封装查询参数
+    Card findCard;
+    strcpy(findCard.aName, newCard.aName);
+    // 调用链表查询函数校验卡号是否重复
+    Card* pExist = searchCardNode(findCard);
+    if (pExist != NULL && pExist->nDel == 0)
     {
-        if (cardList[i].nDel == 0 && strcmp(cardList[i].aName, newCard.aName) == 0)
-        {
-            printf("卡号%s已存在\n", newCard.aName);
-            return -2;
-        }
+        printf("卡号%s已存在\n", newCard.aName);
+        return -2;
     }
 
-    //补充卡片默认值
-    newCard.nStatus = 0;        // 默认未上机
-    newCard.nDel = 0;           // 默认未删除
-    newCard.tStart = time(NULL); // 开卡时间为当前时间
-    newCard.tLast = time(NULL);  // 最后使用时间为当前时间
-    newCard.nUseCount = 0;       // 默认使用次数0
-    newCard.fTotalUse = 0.0f;    // 默认累计金额0
+    newCard.nStatus = 0;
+    newCard.nDel = 0;
+    newCard.tStart = time(NULL);
+    newCard.tLast = time(NULL);
+    newCard.nUseCount = 0;
+    newCard.fTotalUse = 0.0f;
 
-    cardList[g_cardCount] = newCard;
-    g_cardCount++;
+    // 调用链表尾插函数添加
+    addCardNode(newCard);
 
     printf("卡号%s新增成功！当前总卡数：%d\n", newCard.aName, g_cardCount);
     return 0;
 }
 
 //查找卡
-Card* searchCard(char name[]){
-    for (int i = 0; i < g_cardCount; i++){
-        if (cardList[i].nDel == 0 && strcmp(cardList[i].aName, name) == 0){
-            printf("【成功】找到卡号%s的卡片信息：\n", name);
-            printf("  卡号：%s\n", cardList[i].aName);
-            printf("  状态：%d（0-未上机 1-上机中 2-注销 3-失效）\n", cardList[i].nStatus);
-            printf("  余额：%.2f 元\n", cardList[i].fBalance);
-            printf("  使用次数：%d 次\n", cardList[i].nUseCount);
-            printf("  开卡时间：%s", ctime(&cardList[i].tStart)); // ctime自动转换时间为字符串
-            return &cardList[i]; // 返回找到的卡片指针
-        }
+Card* searchCard(char name[]) {
+    // 封装查询参数
+    Card findCard;
+    strcpy(findCard.aName, name);
+    Card* pCard = searchCardNode(findCard);
+
+    if (pCard != NULL && pCard->nDel == 0)
+    {
+        printf("【成功】找到卡号%s的卡片信息：\n", name);
+        printf("  卡号：%s\n", pCard->aName);
+        printf("  状态：%d（0-未上机 1-上机中 2-注销 3-失效）\n", pCard->nStatus);
+        printf("  余额：%.2f 元\n", pCard->fBalance);
+        printf("  使用次数：%d 次\n", pCard->nUseCount);
+        printf("  开卡时间：%s", ctime(&pCard->tStart));
+        return pCard;
     }
 
     // 未找到

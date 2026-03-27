@@ -1,6 +1,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifndef CARD_FILE_H  // 防止头文件重复包含
 #define CARD_FILE_H
