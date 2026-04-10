@@ -4,7 +4,7 @@ void insertCard_service()
 {
     Card newCard = { 0 };
 
-    printf("===== 新增卡片 =====\n");
+    printf("===== 新增卡 =====\n");
     printf("请输入卡号（最长17位）：");
     scanf("%17s", newCard.aName); // 限制长度，防止数组越界
 
@@ -21,9 +21,22 @@ void searchCard_service()
 {
     char searchName[18] = { 0 };
 
-    printf("===== 查找卡片 =====\n");
+    printf("===== 查找卡 =====\n");
     printf("请输入要查询的卡号：");
     scanf("%17s", searchName);
 
     searchCard(searchName);
+}
+
+
+
+void deleteCard_service()
+{
+    char searchName[18] = { 0 };
+
+    printf("===== 删除卡 =====\n");
+    printf("请输入要查询的卡号：");
+    scanf("%17s", searchName);
+
+    deleteCard(searchName);
 }

@@ -42,6 +42,9 @@
     <ClCompile Include="record_file.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="tool.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="menu.h">
@@ -66,6 +69,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="record_file.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tool.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

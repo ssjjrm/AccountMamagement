@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "tool.h"
 
 #ifndef CARD_FILE_H  // 防止头文件重复包含
 #define CARD_FILE_H
@@ -26,5 +27,8 @@ int insertCard(Card newCard);
 
 //查找卡：传入卡号，返回找到的卡片指针（NULL为未找到/已删除）
 Card* searchCard(char name[]);
+
+//删除卡
+void deleteCard(char name[]);
 
 #endif

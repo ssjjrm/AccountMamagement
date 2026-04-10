@@ -1,12 +1,11 @@
 #include "card_file.h"
 
-
+#define FILE_PATH "data/card.txt"  //文件路径
 
 //struct Card cardList[100];
 
 
-
-// CardNode 结构体（你原代码，不动）
+// CardNode 结构体
 struct CardNode {
     Card data;
     struct CardNode* next;
@@ -97,6 +96,16 @@ int deleteCardNode(Card findCard) {
 }
 
 
+void freeCardList() {
+    struct CardNode* p = cardListHead;
+    while (p) {
+        struct CardNode* temp = p;
+        p = p->next;
+        free(temp);
+    }
+    cardListHead = NULL;
+    g_cardCount = 0;
+}
 
 
 void initStaticCardData()
@@ -105,46 +114,8 @@ void initStaticCardData()
     static int isInited = 0;
     if (isInited) return;
 
-    Card card; // 临时卡片变量
-    // 初始化3张测试卡数据 → 调用addCardNode尾插链表
-    // 第1张测试卡
-    strcpy(card.aName, "1");
-    strcpy(card.aPwd, "123");
-    card.nStatus = 0;
-    card.tStart = time(NULL);
-    card.tEnd = 0;
-    card.fTotalUse = 0.0f;
-    card.tLast = time(NULL);
-    card.nUseCount = 0;
-    card.fBalance = 100.0f;
-    card.nDel = 0;
-    addCardNode(card); // 链表尾插
-
-    // 第2张测试卡
-    strcpy(card.aName, "2");
-    strcpy(card.aPwd, "123");
-    card.nStatus = 0;
-    card.tStart = time(NULL);
-    card.tEnd = 0;
-    card.fTotalUse = 0.0f;
-    card.tLast = time(NULL);
-    card.nUseCount = 0;
-    card.fBalance = 200.0f;
-    card.nDel = 0;
-    addCardNode(card); // 链表尾插
-
-    // 第3张测试卡
-    strcpy(card.aName, "3");
-    strcpy(card.aPwd, "123");
-    card.nStatus = 0;
-    card.tStart = time(NULL);
-    card.tEnd = 0;
-    card.fTotalUse = 0.0f;
-    card.tLast = time(NULL);
-    card.nUseCount = 0;
-    card.fBalance = 500.0f;
-    card.nDel = 0;
-    addCardNode(card); // 链表尾插
+    readCardInFile(FILE_PATH);
+    g_cardCount = getCardCountInFile(FILE_PATH);
 
     isInited = 1; // 标记已初始化
 }
@@ -178,15 +149,19 @@ int insertCard(Card newCard) {
     // 调用链表尾插函数添加
     addCardNode(newCard);
 
+    saveCardToFile(&newCard, "data/card.txt");
+
     printf("卡号%s新增成功！当前总卡数：%d\n", newCard.aName, g_cardCount);
     return 0;
 }
+
 
 //查找卡
 Card* searchCard(char name[]) {
     // 封装查询参数
     Card findCard;
     strcpy(findCard.aName, name);
+
     Card* pCard = searchCardNode(findCard);
 
     if (pCard != NULL && pCard->nDel == 0)
@@ -203,4 +178,119 @@ Card* searchCard(char name[]) {
     // 未找到
     printf("【失败】未找到卡号%s的有效卡片！\n", name);
     return NULL;
+}
+
+
+//删除卡
+void deleteCard(char name[]) {
+    // 封装查询参数
+    Card findCard;
+    strcpy(findCard.aName, name);
+
+    if (deleteCardNode(findCard)) {
+        printf("删除成功\n");
+    }
+    else {
+        printf("删除失败\n");
+    }
+
+}
+
+
+// 1. 保存卡到文件（追加到末尾）
+int saveCardToFile(const Card* pCard, const char* pPath) {
+    if (pCard == NULL || pPath == NULL) return 0;
+
+    // 追加模式打开文件
+    FILE* fp = fopen(pPath, "a");
+    if (fp == NULL) {
+        printf("文件打开失败！\n");
+        return 0;
+    }
+
+    // 时间转字符串
+    char startBuf[30] = { 0 }, lastBuf[30] = { 0 }, endBuf[30] = { 0 };
+    timeToString(pCard->tStart, startBuf);
+    timeToString(pCard->tLast, lastBuf);
+    timeToString(pCard->tEnd, endBuf);
+
+    // 按 ## 格式写入文件
+    fprintf(fp, "%s##%s##%d##%s##%s##%.2f##%s##%d##%.2f##%d\n",
+        pCard->aName,
+        pCard->aPwd,
+        pCard->nStatus,
+        startBuf,
+        endBuf,
+        pCard->fTotalUse,
+        lastBuf,
+        pCard->nUseCount,
+        pCard->fBalance,
+        pCard->nDel);
+
+    fclose(fp);
+    return 1;
+}
+
+// 2. 获取文件中卡数量
+int getCardCountInFile(const char* pPath) {
+    FILE* fp = fopen(pPath, "r");
+    if (fp == NULL) return 0;
+
+    int count = 0;
+    char buf[1024];
+    while (fgets(buf, sizeof(buf), fp) != NULL) {
+        if (strlen(buf) > 1) count++;
+    }
+
+    fclose(fp);
+    return count;
+}
+
+// 3. 解析字符串为Card结构体
+Card parseCard(char* pBuf) {
+    Card card;
+    // 按 ## 分割字符串
+    char* token = strtok(pBuf, "##");
+
+    strcpy(card.aName, token);
+    token = strtok(NULL, "##");
+    strcpy(card.aPwd, token);
+    token = strtok(NULL, "##");
+    card.nStatus = atoi(token);
+    token = strtok(NULL, "##");
+    card.tStart = stringToTime(token);
+    token = strtok(NULL, "##");
+    card.tEnd = stringToTime(token);
+    token = strtok(NULL, "##");
+    card.fTotalUse = atof(token);
+    token = strtok(NULL, "##");
+    card.tLast = stringToTime(token);
+    token = strtok(NULL, "##");
+    card.nUseCount = atoi(token);
+    token = strtok(NULL, "##");
+    card.fBalance = atof(token);
+    token = strtok(NULL, "##");
+    card.nDel = atoi(token);
+
+    return card;
+}
+
+// 4. 从文件读取所有卡
+int readCardInFile(const char* pPath) {
+    if (pPath == NULL) return 0;
+
+    FILE* fp = fopen(pPath, "r");
+    if (fp == NULL) return 0;
+
+    char buf[1024];
+    int index = 0;
+
+    while (fgets(buf, sizeof(buf), fp) != NULL) {
+        buf[strcspn(buf, "\n")] = 0; // 去掉换行
+        if (strlen(buf) == 0) continue;
+        addCardNode(parseCard(buf));
+    }
+
+    fclose(fp);
+    return 1;
 }

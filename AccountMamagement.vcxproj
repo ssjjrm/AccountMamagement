@@ -136,6 +136,7 @@
     <ClCompile Include="record_file.c" />
     <ClCompile Include="record_service.c" />
     <ClCompile Include="service.c" />
+    <ClCompile Include="tool.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="billing_file.h" />
@@ -146,6 +147,7 @@
     <ClInclude Include="record_file.h" />
     <ClInclude Include="record_service.h" />
     <ClInclude Include="service.h" />
+    <ClInclude Include="tool.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
